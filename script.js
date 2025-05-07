@@ -30,6 +30,7 @@ const closeBtn = document.getElementById('closeBtn');
 
 let currentIndex = 0;
 let rotation = 0;
+let zoomLevel = 1;
 
 // Generate image thumbnails
 imageUrls.forEach((url, index) => {
@@ -46,7 +47,7 @@ imageUrls.forEach((url, index) => {
 // Show image in viewer
 function showImage() {
     mainImage.src = imageUrls[currentIndex];
-    mainImage.style.transform = `rotate(${rotation}deg)`;
+    mainImage.style.transform = `rotate(${rotation}deg) scale(${zoomLevel})`;
     viewer.style.display = 'flex';
 }
 
@@ -54,19 +55,22 @@ function showImage() {
 closeBtn.addEventListener('click', () => {
     viewer.style.display = 'none';
     rotation = 0;
-    mainImage.style.transform = `rotate(${rotation}deg)`;
+    zoomLevel = 1;
+    mainImage.style.transform = `rotate(${rotation}deg) scale(${zoomLevel})`;
 });
 
 // Navigate images
 prevBtn.addEventListener('click', () => {
     currentIndex = (currentIndex - 1 + imageUrls.length) % imageUrls.length;
     rotation = 0;
+    zoomLevel = 1;
     showImage();
 });
 
 nextBtn.addEventListener('click', () => {
     currentIndex = (currentIndex + 1) % imageUrls.length;
     rotation = 0;
+    zoomLevel = 1;
     showImage();
 });
 
@@ -75,11 +79,24 @@ document.addEventListener('keydown', (e) => {
     if (viewer.style.display === 'flex') {
         if (e.key === 'ArrowRight') {
             rotation += 90;
-            mainImage.style.transform = `rotate(${rotation}deg)`;
+            mainImage.style.transform = `rotate(${rotation}deg) scale(${zoomLevel})`;
         } else if (e.key === 'ArrowLeft') {
             rotation -= 90;
-            mainImage.style.transform = `rotate(${rotation}deg)`;
+            mainImage.style.transform = `rotate(${rotation}deg) scale(${zoomLevel})`;
         }
     }
 });
 
+// Zoom image
+viewer.addEventListener('wheel', (e) => {
+    if (viewer.style.display === 'flex') {
+        e.preventDefault();
+        if (e.deltaY < 0) {
+            zoomLevel += 0.1;
+        } else {
+            zoomLevel -= 0.1;
+            zoomLevel = Math.max(zoomLevel, 0.1); // prevent zoomLevel from going below 0.1
+        }
+        mainImage.style.transform = `rotate(${rotation}deg) scale(${zoomLevel})`;
+    }
+});
